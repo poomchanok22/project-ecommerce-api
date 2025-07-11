@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  age Int
+  email String @unique
+  password String
+  role  Role @default(USER)
+
+  products  Product[] @relation("UserProducts")
+  categories Category[] @relation("UserCategories")
+  orders    Order[]
+  carts     Cart[]
+}
+
+model Category {
+  category_id Int     @id @default(autoincrement())
+  name        String  @unique
+  created_by  Int
+
+  creator     User     @relation("UserCategories", fields: [created_by], references: [id])
+  products    Product[]
+}
+
+model Product {
+  product_id Int     @id @default(autoincrement())
+  name       String
+  description String
+  price      Float
+  stock      Int
+  image      String
+  created_by Int
+  category_id Int
+
+  creator    User     @relation("UserProducts", fields: [created_by], references: [id])
+  category   Category @relation(fields: [category_id], references: [category_id])
+  orderItems Order_Item[]
+  cartItems  Cart_Item[]
+}
+
+model Cart {
+  cart_id   Int     @id @default(autoincrement())
+  user_id   Int
+  created_at DateTime @default(now())
+
+  user       User   @relation(fields: [user_id], references: [id])
+  cartItems  Cart_Item[]
+}
+
+model Cart_Item {
+  cart_item_id Int     @id @default(autoincrement())
+  cart_id      Int
+  product_id   Int
+  quantity     Int
+
+  cart    Cart    @relation(fields: [cart_id], references: [cart_id])
+  product Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Order {
+  order_id   Int     @id @default(autoincrement())
+  user_id    Int
+  oder_date  DateTime @default(now())
+  total_price Float
+  status     String
+
+  user       User   @relation(fields: [user_id], references: [id])
+  payments   Payment[]
+  orderItems Order_Item[]
+}
+
+model Order_Item {
+  order_item_id Int     @id @default(autoincrement())
+  order_id      Int
+  product_id    Int
+  quantity      Int
+  price_per_unit Float
+
+  order   Order   @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Payment {
+  payment_id    Int     @id @default(autoincrement())
+  order_id      Int
+  payment_date  DateTime @default(now())
+  payment_method String
+  payment_status String
+  amount         Float
+
+  order Order @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+}

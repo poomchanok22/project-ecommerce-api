@@ -1,3 +1,4 @@
+import prisma from "../config/prisma.js";
 import authService from "../services/auth.service.js";
 import hashService from "../services/hash.service.js";
 import jwtService from "../services/jwt.service.js";
@@ -48,6 +49,8 @@ export async function login(req, res, next) {
   const payload = {id: foundUser.id}
 
   const accessToken = jwtService.genAccessToken(payload)
+
+ 
 
   const {password : pw, age, ...userData} = foundUser
 

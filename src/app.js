@@ -8,6 +8,7 @@ import errorMiddleware from "./middlewares/error.middleware.js"
 import productsRoute from "./routes/products.route.js"
 import cartRoute from "./routes/cart.route.js"
 import orderRoute from "./routes/order.route.js"
+import confirmRoute from "./routes/confirm.route.js"
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.use("/api/category", authenticate, categoryRoute)
 app.use("/api/products", authenticate, productsRoute)
 app.use("/api/cart", authenticate, cartRoute)
 app.use("/api/order", authenticate, orderRoute)
+app.use("/api/confirm", confirmRoute)
 
 
 

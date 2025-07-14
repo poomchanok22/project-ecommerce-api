@@ -20,55 +20,55 @@ enum Role {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  age Int
-  email String @unique
+  id       Int    @id @default(autoincrement())
+  name     String
+  age      Int
+  email    String @unique
   password String
-  role  Role @default(USER)
+  role     Role   @default(USER)
 
-  products  Product[] @relation("UserProducts")
+  products   Product[]  @relation("UserProducts")
   categories Category[] @relation("UserCategories")
-  orders    Order[]
-  carts     Cart[]
+  orders     Order[]
+  carts      Cart[]
 }
 
 model Category {
-  category_id Int     @id @default(autoincrement())
-  name        String  @unique
+  category_id Int    @id @default(autoincrement())
+  name        String @unique
   created_by  Int
 
-  creator     User     @relation("UserCategories", fields: [created_by], references: [id])
-  products    Product[]
+  creator  User      @relation("UserCategories", fields: [created_by], references: [id])
+  products Product[]
 }
 
 model Product {
-  product_id Int     @id @default(autoincrement())
-  name       String
+  product_id  Int    @id @default(autoincrement())
+  name        String
   description String
-  price      Float
-  stock      Int
-  image      String
-  created_by Int
+  price       Float
+  stock       Int
+  image       String
+  created_by  Int
   category_id Int
 
-  creator    User     @relation("UserProducts", fields: [created_by], references: [id])
-  category   Category @relation(fields: [category_id], references: [category_id])
+  creator    User         @relation("UserProducts", fields: [created_by], references: [id])
+  category   Category     @relation(fields: [category_id], references: [category_id])
   orderItems Order_Item[]
   cartItems  Cart_Item[]
 }
 
 model Cart {
-  cart_id   Int     @id @default(autoincrement())
-  user_id   Int
+  cart_id    Int      @id @default(autoincrement())
+  user_id    Int
   created_at DateTime @default(now())
 
-  user       User   @relation(fields: [user_id], references: [id])
-  cartItems  Cart_Item[]
+  user      User        @relation(fields: [user_id], references: [id])
+  cartItems Cart_Item[]
 }
 
 model Cart_Item {
-  cart_item_id Int     @id @default(autoincrement())
+  cart_item_id Int @id @default(autoincrement())
   cart_id      Int
   product_id   Int
   quantity     Int
@@ -78,22 +78,22 @@ model Cart_Item {
 }
 
 model Order {
-  order_id   Int     @id @default(autoincrement())
-  user_id    Int
-  oder_date  DateTime @default(now())
+  order_id    Int      @id @default(autoincrement())
+  user_id     Int
+  oder_date   DateTime @default(now())
   total_price Float
-  status     String
+  status      String   @default("PENDING")
 
-  user       User   @relation(fields: [user_id], references: [id])
+  user       User         @relation(fields: [user_id], references: [id])
   payments   Payment[]
   orderItems Order_Item[]
 }
 
 model Order_Item {
-  order_item_id Int     @id @default(autoincrement())
-  order_id      Int
-  product_id    Int
-  quantity      Int
+  order_item_id  Int   @id @default(autoincrement())
+  order_id       Int
+  product_id     Int
+  quantity       Int
   price_per_unit Float
 
   order   Order   @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
@@ -101,12 +101,15 @@ model Order_Item {
 }
 
 model Payment {
-  payment_id    Int     @id @default(autoincrement())
-  order_id      Int
-  payment_date  DateTime @default(now())
-  payment_method String
-  payment_status String
-  amount         Float
+  payment_id      Int      @id @default(autoincrement())
+  order_id        Int
+  stripePaymentId String?  @unique
+  sessionUrl      String? @db.VarChar(2048)
+  recoveryUrl     String? @db.VarChar(2048)
+  payment_date    DateTime @default(now())
+  payment_method  String
+  payment_status  String   @default("PENDING")
+  amount          Float
 
   order Order @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
 }

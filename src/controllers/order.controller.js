@@ -55,6 +55,12 @@ export const createOrderAndCheckout = async (req, res, next) => {
     },
   });
 
+   await prisma.cart_Item.deleteMany({
+      where: {
+        cart: { user_id: order.user_id },
+      },
+    });
+
   res.status(200).json({ checkoutUrl: session.url });
 };
 
@@ -176,4 +182,27 @@ export const deleteOrderById = async (req, res, next) => {
   });
 
   res.status(200).json({ message: "Order deleted successfully" });
+};
+
+export const cancelOrder = async (req, res, next) => {
+  const { order_id } = req.params;
+  const userId = req.user.id;
+
+    const order = await prisma.order.findUnique({ where: { order_id: Number(order_id )} });
+
+    if (!order || order.user_id !== userId) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.status !== "PENDING") {
+      return res.status(400).json({ message: "Cannot cancel a processed order" });
+    }
+
+    await prisma.order.update({
+      where: { order_id: Number(order_id) },
+      data: { status: "CANCELLED" },
+    });
+
+    res.json({ message: "Order cancelled successfully" });
+  
 };
